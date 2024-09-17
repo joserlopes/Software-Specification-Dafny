@@ -1,6 +1,3 @@
-// Professor notes
-// 
-
 method noRepetitionsQuadratic(arr : array<nat>) returns (b: bool) 
  {
   var i := 0; 
