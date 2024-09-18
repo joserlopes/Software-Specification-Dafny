@@ -152,10 +152,24 @@ lemma DeserializeAuxProperty(e : aexpr, cs: seq<code>, es: seq<aexpr>)
 // /*
 //   Ex1.3
 // */
-// function SerializeCodes(cs : seq<code>) : seq<nat> 
-// {
+function SerializeCodes(cs : seq<code>) : seq<nat> 
+{
+  
+  if cs == [] then [ 0 ]
+  else 
+    match cs[0] {
+    case ValCode(i) => [0] + [ i + 5 ] + SerializeCodes(cs[1..])
+    case VarCode(s) => [1] + SerializeCodeVar(s) + SerializeCodes(cs[1..])
+    case UnOpCode(op) => [2] + SerializeCodes(cs[1..])
+    case BinOpCode(op) => match op {case Plus => [3] case Minus => [4]} + SerializeCodes(cs[1..])
+  }
+}
 
-// }
+function SerializeCodeVar(s: seq<nat>): seq<nat>
+{
+  seq(|s|, i requires 0 <= i < |s| => s[i] + 5)
+}
+
 
 // function DeserializeCodes(ints : seq<nat>) : seq<code> {
   
