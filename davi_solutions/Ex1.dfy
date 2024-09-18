@@ -19,7 +19,7 @@ function Serialize(a : aexpr) : seq<code>
     case Var(s) => [ VarCode(s) ]
     case Val(i) => [ ValCode(i) ]
     case UnOp(op, a1) => Serialize(a1) + [ UnOpCode(op) ] // sequence
-    case BinOp(op, a1, a2) => Serialize(a1) + Serialize(a2) + [ BinOpCode(op) ]
+    case BinOp(op, a1, a2) => Serialize(a2) + Serialize(a1) + [ BinOpCode(op) ]
   }
 }
 
@@ -47,7 +47,7 @@ function DeserializeAux(cs: seq<code>, currAexp: seq<aexpr>): seq<aexpr>
       case BinOpCode(op) =>
         if |currAexp| < 2 then []
         else 
-          DeserializeAux(cs[1..], [BinOp(op, currAexp[1], currAexp[0])] + currAexp[2..])
+          DeserializeAux(cs[1..], [BinOp(op, currAexp[0], currAexp[1])] + currAexp[2..])
     }
 }
 
@@ -122,25 +122,25 @@ lemma DeserializeAuxProperty(e : aexpr, cs: seq<code>, es: seq<aexpr>)
 
       }
     case BinOp(op, a1, a2) =>
-      assert Serialize(a1) + Serialize(a2) + [ BinOpCode(op) ] + cs == Serialize(a1) + (Serialize(a2) + [BinOpCode(op)] + cs); //why this might not hold?
-      assert Serialize(a2) + [ BinOpCode(op) ] + cs == Serialize(a2) + ([BinOpCode(op)] + cs); //why this might not hold?
-      assert [a2] + ([a1] + es) == [a2, a1] + es;
+      assert Serialize(a2) + Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a2) + (Serialize(a1) + [BinOpCode(op)] + cs); //why this might not hold?
+      assert Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a1) + ([BinOpCode(op)] + cs); //why this might not hold?
+      assert [a1] + ([a2] + es) == [a1, a2] + es;
       calc{
         DeserializeAux(Serialize(e) + cs, es);
         ==
         DeserializeAux(Serialize(BinOp(op, a1, a2)) + cs, es); //Case
         ==
-        DeserializeAux(Serialize(a1) + Serialize(a2) + [ BinOpCode(op) ] + cs, es); // Def of serialize
+        DeserializeAux(Serialize(a2) + Serialize(a1) + [ BinOpCode(op) ] + cs, es); // Def of serialize
         ==
-        DeserializeAux(Serialize(a1) + (Serialize(a2) + [ BinOpCode(op) ] + cs), es); // Seq props
+        DeserializeAux(Serialize(a2) + (Serialize(a1) + [ BinOpCode(op) ] + cs), es); // Seq props
         ==        
-        DeserializeAux(Serialize(a2) + [ BinOpCode(op) ] + cs, [a1] + es); // Lemma
+        DeserializeAux(Serialize(a1) + [ BinOpCode(op) ] + cs, [a2] + es); // Lemma
         ==
-        DeserializeAux(Serialize(a2) + ([ BinOpCode(op) ] + cs), [a1] + es); // Seq props
-        == {DeserializeAuxProperty(a1, [ BinOpCode(op) ] + cs, es);}
-        DeserializeAux([ BinOpCode(op) ] + cs, [a2] + ([a1] + es)); // lemma. Why cant be proved?
+        DeserializeAux(Serialize(a1) + ([ BinOpCode(op) ] + cs), [a2] + es); // Seq props
+        == {DeserializeAuxProperty(a2, [ BinOpCode(op) ] + cs, es);}
+        DeserializeAux([ BinOpCode(op) ] + cs, [a1] + ([a2] + es)); // lemma. Why cant be proved?
         ==
-        DeserializeAux([ BinOpCode(op) ] + cs, [a2, a1] + es); // Seq props
+        DeserializeAux([ BinOpCode(op) ] + cs, [a1, a2] + es); // Seq props
         ==
         DeserializeAux(cs, [BinOp(op, a1, a2) ]+ es); // Deserialize def
 
