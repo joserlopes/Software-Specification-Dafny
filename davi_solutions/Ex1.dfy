@@ -155,25 +155,29 @@ lemma DeserializeAuxProperty(e : aexpr, cs: seq<code>, es: seq<aexpr>)
 function SerializeCodes(cs : seq<code>) : seq<nat> 
 {
   
-  if cs == [] then [ 0 ]
+  if cs == [] then []
   else 
     match cs[0] {
-    case ValCode(i) => [0] + [ i + 5 ] + SerializeCodes(cs[1..])
-    case VarCode(s) => [1] + SerializeCodeVar(s) + SerializeCodes(cs[1..])
+    case ValCode(i) => [0] + [ i ] + SerializeCodes(cs[1..])
+    case VarCode(s) => [1] + [|s|] + s + SerializeCodes(cs[1..])
     case UnOpCode(op) => [2] + SerializeCodes(cs[1..])
     case BinOpCode(op) => match op {case Plus => [3] case Minus => [4]} + SerializeCodes(cs[1..])
   }
 }
 
-function SerializeCodeVar(s: seq<nat>): seq<nat>
-{
-  seq(|s|, i requires 0 <= i < |s| => s[i] + 5)
+function DeserializeCodes(ints : seq<nat>) : seq<code> 
+  requires 0 <= ints[0] < 5 || |ints| == 0
+ {
+  if |ints| == 0 then []
+  else
+    match ints[0]{
+      case 0 => [ ValCode(ints[1]) ] + DeserializeCodes(ints[2..])
+      case 1 => [ VarCode(ints[2..ints[1]+2]) ] + DeserializeCodes(ints[ints[1]+2..]) // E.g. 13ABCX
+      case 2 => [ UnOpCode(Neg) ] + DeserializeCodes(ints[1..])
+      case 3 => [ BinOpCode(Plus) ] + DeserializeCodes(ints[1..])
+      case 4 => [ BinOpCode(Minus) ] + DeserializeCodes(ints[1..])
+    }
 }
-
-
-// function DeserializeCodes(ints : seq<nat>) : seq<code> {
-  
-// }
 
 
 // /*
