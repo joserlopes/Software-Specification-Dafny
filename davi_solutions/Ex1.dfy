@@ -166,16 +166,17 @@ function SerializeCodes(cs : seq<code>) : seq<nat>
 }
 
 function DeserializeCodes(ints : seq<nat>) : seq<code> 
-  requires 0 <= ints[0] < 5 || |ints| == 0
+
  {
   if |ints| == 0 then []
   else
     match ints[0]{
-      case 0 => [ ValCode(ints[1]) ] + DeserializeCodes(ints[2..])
-      case 1 => [ VarCode(ints[2..ints[1]+2]) ] + DeserializeCodes(ints[ints[1]+2..]) // E.g. 13ABCX
+      case 0 => if |ints| == 1 then [] else [ ValCode(ints[1]) ] + DeserializeCodes(ints[2..])
+      case 1 => if |ints| == 1 || |ints| < ints[1] + 2 then [] else [ VarCode(ints[2..ints[1]+2]) ] + DeserializeCodes(ints[ints[1]+2..]) // E.g. 13ABCX
       case 2 => [ UnOpCode(Neg) ] + DeserializeCodes(ints[1..])
-      case 3 => [ BinOpCode(Plus) ] + DeserializeCodes(ints[1..])
+      case 3 => [ BinOpCode(Plus) ] + DeserializeCodes(ints[1..]) //add the ugly condition here?
       case 4 => [ BinOpCode(Minus) ] + DeserializeCodes(ints[1..])
+      case _ => []
     }
 }
 
