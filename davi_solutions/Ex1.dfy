@@ -201,7 +201,6 @@ lemma DeserializeCodesProperty(cs: seq<code>)
   else{
     match cs[0] {
       case ValCode(i) =>
-        // assert SerializeCodes([ValCode(i)] + cs_rest) == [0] + [ i ] + SerializeCodes(cs_rest);
         calc{
           DeserializeCodes(SerializeCodes([ValCode(i)] + cs[1..]));
           == // By SerializeCodes def
@@ -272,13 +271,13 @@ lemma DeserializeCodesProperty(cs: seq<code>)
 // /*
 //   Ex1.5
 // */
-// function FullSerialize(e : aexpr) : seq<nat> {
- 
-// }
+function FullSerialize(e : aexpr) : seq<nat> {
+  SerializeCodes(Serialize(e))
+}
 
-// function FullDeserealize(nats : seq<nat>) : seq<aexpr> {
- 
-// }
+function FullDeserealize(nats : seq<nat>) : seq<aexpr> {
+ Deserialize(DeserializeCodes(nats))
+}
 
 // /*
 //   Ex1.6
