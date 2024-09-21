@@ -183,11 +183,91 @@ function DeserializeCodes(ints : seq<nat>) : seq<code>
 
 // /*
 //   Ex1.4
-// */
-// lemma DeserializeCodesProperty(cs : seq<code>)
-//   ensures DeserializeCodes(SerializeCodes(cs)) == cs
-// {
-// }
+lemma DeserializeCodesProperty(cs: seq<code>)
+  ensures  DeserializeCodes(SerializeCodes(cs)) == cs
+  
+{
+   if cs == [] {
+    calc {
+      DeserializeCodes(SerializeCodes(cs));
+      == // Def of serialize
+      DeserializeCodes([]);
+      == // Def of deserialize
+      [];
+      == // Case
+      cs;
+    }
+  }
+  else{
+    match cs[0] {
+      case ValCode(i) =>
+        // assert SerializeCodes([ValCode(i)] + cs_rest) == [0] + [ i ] + SerializeCodes(cs_rest);
+        calc{
+          DeserializeCodes(SerializeCodes([ValCode(i)] + cs[1..]));
+          == // By SerializeCodes def
+          DeserializeCodes([0] + [ i ] + SerializeCodes(cs[1..]));
+          == // By serializeCodes def
+          [ ValCode(i) ] + DeserializeCodes(SerializeCodes(cs[1..]));
+          == {DeserializeCodesProperty(cs[1..]);} // By induction hypothesis
+          [ ValCode(i) ] + cs[1..];
+          == // By case
+          [cs[0]] + cs[1..];
+          ==
+          cs;
+        }
+      case VarCode(s) =>
+      calc{
+        DeserializeCodes(SerializeCodes([VarCode(s)] + cs[1..]));
+        == // Def of serialize
+        DeserializeCodes([1] + [|s|] + s + SerializeCodes(cs[1..]));
+        == // Def of deserialize
+        [ VarCode(s) ] + DeserializeCodes(SerializeCodes(cs[1..]));
+        == // Induction hypothesis
+        [ VarCode(s) ] + cs[1..];
+        ==
+        cs;
+      }
+      case UnOpCode(Neg) =>
+      calc{
+        DeserializeCodes(SerializeCodes([UnOpCode(Neg)] + cs[1..]));
+        == // Def of serialize
+        DeserializeCodes([2] + SerializeCodes(cs[1..]));
+        == // Def of deserialize
+        [ UnOpCode(Neg) ] + DeserializeCodes(SerializeCodes(cs[1..]));
+        == // Induction hypothesis
+        [ UnOpCode(Neg) ] + cs[1..];
+        ==
+        cs;
+      }
+      case BinOpCode(Plus) =>
+      calc{
+        DeserializeCodes(SerializeCodes([BinOpCode(Plus)] + cs[1..]));
+        == // Def of serialize
+        DeserializeCodes([3] + SerializeCodes(cs[1..]));
+        == // Def of deserialize
+        [ BinOpCode(Plus) ] + DeserializeCodes(SerializeCodes(cs[1..]));
+        == // Induction hypothesis
+        [ BinOpCode(Plus) ] + cs[1..];
+        ==
+        cs;
+      }
+      case BinOpCode(Minus) =>
+      calc{
+        DeserializeCodes(SerializeCodes([BinOpCode(Minus)] + cs[1..]));
+        == // Def of serialize
+        DeserializeCodes([4] + SerializeCodes(cs[1..]));
+        == // Def of deserialize
+        [ BinOpCode(Minus) ] + DeserializeCodes(SerializeCodes(cs[1..]));
+        == // Induction hypothesis
+        [ BinOpCode(Minus) ] + cs[1..];
+        ==
+        cs;
+      }
+    }
+  }
+
+
+}
 
 // /*
 //   Ex1.5
