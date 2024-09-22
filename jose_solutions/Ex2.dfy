@@ -38,7 +38,7 @@ method noRepetitionsQuadratic(arr : array<nat>) returns (b: bool)
   Ex2.2
 */
 method noRepetitionsLinear(arr : array<nat>) returns (b: bool) 
-  // No repetitions
+  // No repetitions found
   ensures b ==> forall k1, k2 :: 0 <= k1 < arr.Length && 0 <= k2 < arr.Length && k1 != k2 ==> arr[k1] != arr[k2] 
   // Repetition found
   ensures !b ==> exists k1, k2 :: 0 <= k1 < arr.Length && 0 <= k2 < arr.Length && k1 != k2 && arr[k1] == arr[k2]
@@ -47,15 +47,26 @@ method noRepetitionsLinear(arr : array<nat>) returns (b: bool)
 
   var presenceArr := new bool[maxElement + 1];
 
+  // Is there a better way to prove that all the elements of `presenceArr` are false at the beggining
+  var j := 0;
+  while (j < presenceArr.Length)
+    invariant 0 <= j <= presenceArr.Length
+    invariant forall k :: 0 <= k < j ==> presenceArr[k] == false
+  {
+    presenceArr[j] := false;
+    j := j + 1;
+  }
+
   var i := 0;
   b := true;
 
   while (i < arr.Length)
     invariant 0 <= i <= arr.Length
-    invariant forall k :: 0 <= k < i ==> presenceArr[arr[k]]
-    invariant forall k1 :: 0 <= k1 < presenceArr.Length && !presenceArr[k1] ==> forall k2 :: 0 <= k2 < i ==> arr[k2] != k1
+    // Are these two invariants needed?
+    // invariant forall k :: 0 <= k < i ==> presenceArr[arr[k]]
+    // invariant forall k1 :: 0 <= k1 < presenceArr.Length && !presenceArr[k1] ==> forall k2 :: 0 <= k2 < i ==> arr[k2] != k1
     invariant forall k1, k2 :: 0 <= k1 < i && 0 <= k2 < i && k1 != k2 ==> arr[k1] != arr[k2]
-    invariant forall k1 :: 0 <= k1 < presenceArr.Length && presenceArr[k1] ==> exists k2 :: 0 <= k2 < i && arr[k2] == k1
+    invariant forall k1 :: 0 <= k1 < presenceArr.Length && presenceArr[k1] <==> exists k2 :: 0 <= k2 < i && arr[k2] == k1
   {
     if (presenceArr[arr[i]]) {
       b := false;
@@ -63,7 +74,6 @@ method noRepetitionsLinear(arr : array<nat>) returns (b: bool)
     } else {
       presenceArr[arr[i]] := true;
     }
-
     i := i + 1;
   }
 }
