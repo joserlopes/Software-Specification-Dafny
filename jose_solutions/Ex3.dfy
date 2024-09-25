@@ -40,7 +40,6 @@ module Ex3 {
       this.next := null;
       this.footprint := { this };
       this.content := { v };
-
     }
 
     method add(v : nat) returns (r : Node)
@@ -54,7 +53,6 @@ module Ex3 {
       r.next := this;
       r.content := { v } + this.content;
       r.footprint := { r } + this.footprint;
-
     }
 
     method mem(v : nat) returns (b : bool)
@@ -72,7 +70,7 @@ module Ex3 {
         decreases if (curr != null) then curr.footprint else {}
         invariant v !in list_aux
       {
-        if(curr.val == v){
+        if (curr.val == v) {
           b := true;
           return;
         }
