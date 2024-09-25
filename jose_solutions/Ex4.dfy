@@ -26,7 +26,7 @@ module Ex4 {
     }
 
     constructor () 
-      ensures Valid() && this.content == {} && this.footprint == {}
+      ensures this.Valid() && this.content == {} && this.footprint == {}
     {
       list := null; 
       footprint := {}; 
@@ -35,8 +35,13 @@ module Ex4 {
 
 
     method mem (v : nat) returns (b : bool)
+      requires this.Valid()
+      ensures b == if this.list != null then (v in this.list.content) else false
     {
-   
+      b := false;
+      if (this.list != null) {
+        b := this.list.mem(v);
+      }
     }
 
 
