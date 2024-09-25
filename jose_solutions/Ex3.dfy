@@ -13,15 +13,23 @@ module Ex3 {
       reads this, this.footprint 
       decreases footprint
     {
-      if (this.next == null) then
-        this.content == { this.val }
-        && this.footprint == { this }
-      else
-        this.next in this.footprint
-        && this.content == { this.val } + this.next.content
-        && this.footprint == { this } + this.next.footprint
-        && this !in next.footprint
-        && this.next.Valid()
+      this in this.footprint 
+      &&
+      if (this.next == null)
+        then 
+          this.footprint == { this }
+          && 
+          this.content == { this.val }
+        else 
+          this.next in this.footprint
+          &&
+          this !in this.next.footprint
+          &&      
+          this.footprint == { this } + this.next.footprint 
+          &&
+          this.content == { this.val } + this.next.content
+          &&
+          this.next.Valid()
     }
 
     constructor (v : nat) 
