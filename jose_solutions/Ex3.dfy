@@ -67,8 +67,8 @@ module Ex3 {
         invariant curr != null ==> curr.Valid()
         invariant curr != null ==> this.content == list_aux + curr.content
         invariant curr == null ==> this.content == list_aux
-        decreases if (curr != null) then curr.footprint else {}
         invariant v !in list_aux
+        decreases if (curr != null) then curr.footprint else {}
       {
         if (curr.val == v) {
           b := true;
