@@ -33,8 +33,7 @@ module Ex4 {
       content := {};      
     }
 
-
-    method mem (v : nat) returns (b : bool)
+    method mem(v : nat) returns (b : bool)
       requires this.Valid()
       ensures b == if this.list != null then (v in this.list.content) else false
     {
@@ -42,11 +41,17 @@ module Ex4 {
       if (this.list != null) {
         b := this.list.mem(v);
       }
+      // No need to update ghost attributes because neither one is being changed
     }
 
-
-    method add (v : nat) 
+    method add(v : nat) 
+      requires this.Valid()
+      modifies this
     {
+      var aux := this.mem(v);
+      if (!aux && this.list != null) {
+        this.list := this.list.add(v);
+      }
     }
 
 

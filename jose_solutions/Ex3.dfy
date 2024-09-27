@@ -45,7 +45,7 @@ module Ex3 {
     method add(v : nat) returns (r : Node)
       requires Valid()
       ensures r.Valid()
-        && r.content== { v } + this.content
+        && r.content == { v } + this.content
         && r.footprint == { r } + this.footprint
       ensures fresh(r)
     {
