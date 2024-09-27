@@ -33,9 +33,11 @@ module Ex4 {
       content := {};      
     }
 
+    // list.mem has linear complexity
     method mem(v : nat) returns (b : bool)
       requires this.Valid()
-      ensures b == if this.list != null then (v in this.list.content) else false
+      // ensures b == if this.list != null then (v in this.list.content) else false
+      ensures b == (v in this.content)
     {
       b := false;
       if (this.list != null) {
@@ -44,14 +46,20 @@ module Ex4 {
       // No need to update ghost attributes because neither one is being changed
     }
 
+    // Since this method calls mem, it has linear complexity.
     method add(v : nat) 
       requires this.Valid()
+      ensures this.Valid()
+      // TODO: Ghost attributes post-conditions
       modifies this
     {
       var aux := this.mem(v);
       if (!aux && this.list != null) {
         this.list := this.list.add(v);
+        this.content := this.list.content;
+        this.footprint :=  this.list.footprint;
       }
+      // TODO: Update ghost attributes
     }
 
 
@@ -67,6 +75,5 @@ module Ex4 {
 
     }
   }
-
 }
 
