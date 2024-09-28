@@ -10,7 +10,7 @@ module Ex4 {
     ghost var content : set<nat>
 
     ghost function Valid() : bool 
-      reads this, footprint, this.list
+      reads this, this.footprint, this.list
     {
       if (this.list == null)
         then 
@@ -25,7 +25,7 @@ module Ex4 {
           list.Valid()
     }
 
-    constructor () 
+    constructor() 
       ensures this.Valid() && this.content == {} && this.footprint == {}
     {
       list := null; 
@@ -50,28 +50,33 @@ module Ex4 {
     method add(v : nat) 
       requires this.Valid()
       ensures this.Valid()
-      // TODO: Ghost attributes post-conditions
-      modifies this
+      ensures old(this.content) == {} ==> this.content == { v } && this.footprint == { this.list }
+      // ensures old(this.content) != {} ==> this.content == { v } + old(this.content)
+      modifies this, this.footprint
     {
-      var aux := this.mem(v);
-      if (!aux && this.list != null) {
-        this.list := this.list.add(v);
-        this.content := this.list.content;
-        this.footprint :=  this.list.footprint;
+      var present := this.mem(v);
+      if (!present && this.list != null) {
+        var aux := this.list.add(v);
+        this.list := aux;
+        this.content := aux.content;
+        this.footprint :=  aux.footprint;
+      // If the list is empty then we can surely add the element
+      } else {
+        var aux := new Ex3.Node(v);
+        this.list := aux;
+        this.footprint := { aux };
+        this.content := { v };
       }
-      // TODO: Update ghost attributes
     }
-
 
     method union(s : Set) returns (r : Set)
     {
-    
+
     }
 
 
   method inter(s : Set) returns (r : Set)
     {
-      
 
     }
   }
