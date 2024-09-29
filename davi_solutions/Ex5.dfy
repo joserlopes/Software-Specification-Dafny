@@ -64,7 +64,8 @@ module Ex5 {
 
     method mem (v : nat) returns (b : bool)
       requires this.Valid()
-      ensures v < |this.tblSeq| ==> b == (v in this.content) // What do you think abots
+      ensures (v < |this.tblSeq| ==> b == (v in this.content) )
+           && (v < |this.tblSeq| ==> b == (tblSeq[v]))
     {
       b := false;
       if (v < tbl.Length){
@@ -73,13 +74,13 @@ module Ex5 {
     }
     
     method add (v : nat) 
-      requires this.Valid() && v < tbl.Length
+      requires this.Valid() && v < |tblSeq|
       ensures this.content == { v } + old(this.content)
       ensures this.footprint == { this.list } + old(this.footprint) 
       modifies this, tbl
       ensures this.Valid()
     {
-      var value_exists := tbl[v];
+      var value_exists := this.mem(v);
       if (this.list == null) {
         var aux := new Ex3.Node(v);
         this.list := aux;
@@ -92,7 +93,6 @@ module Ex5 {
         assert forall k :: 0 <= k < |this.tblSeq| ==>  k in this.content ==> this.tblSeq[k] == true ;
         assert forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false ==> k !in this.content;
         assert forall k :: 0 <= k < |this.tblSeq| ==>  k !in this.content ==> this.tblSeq[k] == false ;
-
       } else if (!value_exists) {
         var added_node := this.list.add(v);
         this.list := added_node;
