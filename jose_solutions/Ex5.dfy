@@ -14,7 +14,7 @@ module Ex5 {
 
     // If something is in the set than that entry is true in tbl
     ghost function Valid() : bool 
-      reads this, this.footprint, this.list
+      reads this, this.footprint, this.list, this.tbl
     {
       if (this.list == null)
         then
@@ -23,12 +23,16 @@ module Ex5 {
           this.content == {}
           &&
           forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false
+          &&
+          forall k :: 0 <= k < |this.tblSeq|== this.tbl.Length ==> this.tblSeq[k] == this.tbl[k]
         else 
           this.footprint == this.list.footprint
           &&
           this.content == this.list.content
           &&
           this.list.Valid()
+          &&
+          forall k :: 0 <= k < |this.tblSeq|== this.tbl.Length ==> this.tblSeq[k] == this.tbl[k]
           &&
           // Just like int Ex2.2 this is a double way implication
           forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] <==> k in this.content
