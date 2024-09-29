@@ -16,15 +16,15 @@ module Ex5 {
     ghost function Valid() : bool 
       reads this, this.footprint, this.list, this.tbl
     {
+      this.tbl.Length == |this.tblSeq|
+      &&
       if (this.list == null)
         then
           this.footprint == {}
           &&
           this.content == {}
           &&
-          forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false
-          &&
-          forall k :: 0 <= k < |this.tblSeq|== this.tbl.Length ==> this.tblSeq[k] == this.tbl[k]
+          forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == false
         else 
           this.footprint == this.list.footprint
           &&
@@ -32,13 +32,15 @@ module Ex5 {
           &&
           this.list.Valid()
           &&
-          forall k :: 0 <= k < |this.tblSeq|== this.tbl.Length ==> this.tblSeq[k] == this.tbl[k]
+          (forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == (k in this.content))
           &&
-          // Just like int Ex2.2 this is a double way implication
-          forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] <==> k in this.content
+          // Just like in Ex2.2 this is a double way implication
+          // Is this the same as this.tblSeq[k] <==> (k in this.content)
+          forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == (k in this.content)
     }
       
-    constructor (size : nat) 
+    constructor(size : nat) 
+      ensures |this.tblSeq| == this.tbl.Length == size + 1
       ensures this.Valid() && this.content == {} && this.footprint == {}
       ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false
     {
@@ -52,6 +54,7 @@ module Ex5 {
         aux[i] := false;
         i := i + 1;
       }
+
       this.list := null;
       this.tbl := aux;
       this.tblSeq := aux[..];
@@ -60,19 +63,46 @@ module Ex5 {
     }
 
     method mem (v : nat) returns (b : bool)
+      requires this.Valid()
+      requires v < |this.tblSeq|
+      ensures b == (v in this.content)
     {
+      b := this.tbl[v];
     }
     
-    method add (v : nat) 
+    method add(v : nat) 
+      requires this.Valid()
+      requires v < |this.tblSeq|
+      ensures this.content == { v } + old(this.content)
+      ensures this.Valid()
+      modifies this, this.tbl
     {
+      var present := this.mem(v);
+      if (this.list == null) {
+        var aux := new Ex3.Node(v);
+        this.list := aux;
+        this.tbl[v] := true;
+        this.tblSeq := this.tbl[..];
+        this.footprint := { aux };
+        this.content := { v };
+      } else if (this.list != null && !present) {
+        var aux := this.list.add(v);
+        this.list := aux;
+        this.tbl[v] := true;
+        this.tblSeq := this.tbl[..];
+        this.content := aux.content;
+        this.footprint :=  aux.footprint;
+      }
     }
 
     method union(s : Set) returns (r : Set)
     {
+
     }
 
     method inter(s : Set) returns (r : Set)
     {
+
     }
   }
 }
