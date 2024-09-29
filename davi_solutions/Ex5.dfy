@@ -79,21 +79,26 @@ module Ex5 {
       modifies this, tbl
       ensures this.Valid()
     {
-
       var value_exists := tbl[v];
       if (this.list == null) {
         var aux := new Ex3.Node(v);
         this.list := aux;
         this.tbl[v] := true;
-        this.tblSeq := tbl[..];
+        this.tblSeq := this.tbl[..];
         this.footprint := { aux };
         this.content := { v };
+        assert tblSeq[v] == true;
+        assert forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == true ==> k in this.content;
+        assert forall k :: 0 <= k < |this.tblSeq| ==>  k in this.content ==> this.tblSeq[k] == true ;
+        assert forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false ==> k !in this.content;
+        assert forall k :: 0 <= k < |this.tblSeq| ==>  k !in this.content ==> this.tblSeq[k] == false ;
+
       } else if (!value_exists) {
         var added_node := this.list.add(v);
         this.list := added_node;
-        this.content := added_node.content;
         this.tbl[v] := true;
         this.tblSeq := tbl[..];
+        this.content := added_node.content;
         this.footprint := added_node.footprint;
         assert this.content == { v } + old(this.content);
       }
