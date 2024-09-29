@@ -74,11 +74,6 @@ module Ex4 {
       ensures fresh(r)
       ensures r.Valid()
     {
-      // cases: 
-      // both s and this are empty
-      // s is empty
-      // this is empty
-      // s and this are not empty
       r := new Set();
 
       if (this.list == null && s.list == null){
@@ -105,8 +100,6 @@ module Ex4 {
         r.content := this.content;
         var curr_s := s.list;
         while (curr_s != null)
-        // invariant curr_s != null ==> curr_s.Valid()
-        // invariant fresh(r.footprint - this.footprint - s.footprint)
         invariant r.Valid()
         {
           r.add(curr_s.val);
