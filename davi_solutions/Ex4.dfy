@@ -72,9 +72,7 @@ module Ex4 {
       ensures r.content == s.content + this.content
       ensures r.footprint == s.footprint + this.footprint
       ensures fresh(r)
-      // modifies r, r.footprint
       ensures r.Valid()
-
     {
       // cases: 
       // both s and this are empty
@@ -86,28 +84,32 @@ module Ex4 {
       if (this.list == null && s.list == null){
         return;
       }
-      else if(s.list == null && this.list != null){
+      else if(this.list != null){
+        assert s.list == null ==> s.content == {};
+        assert s.list == null ==> s.footprint == {};
+
         r.list := this.list.copy();
-        r.footprint := this.footprint;
-        r.content := this.content;
-        return;
+        r.footprint := this.list.footprint;
+        r.content := this.list.content;
+        return; // maybe some issue with copy
       }
-      else if(s.list == null && this.list != null){
-        r.list := s.list;
-        r.footprint := s.footprint;
-        r.content := s.content;
+      else if(s.list != null){
+        r.list := s.list.copy();
+        r.footprint := s.list.footprint;
+        r.content := s.list.content;
         return;
       }
       else{
-        r.list := this.list;
+        r.list := this.list.copy();
         r.footprint := this.footprint;
         r.content := this.content;
         var curr_s := s.list;
         while (curr_s != null)
-        invariant curr_s != null ==> curr_s.Valid()
-        invariant fresh(r.footprint - this.footprint - s.footprint)
+        // invariant curr_s != null ==> curr_s.Valid()
+        // invariant fresh(r.footprint - this.footprint - s.footprint)
         invariant r.Valid()
         {
+          r.add(curr_s.val);
           curr_s := curr_s.next;
         }
         return;
