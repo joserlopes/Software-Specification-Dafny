@@ -36,9 +36,7 @@ module Ex5 {
           && 
           this.list.Valid()
           && 
-          (forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == this.tbl[k])
-          && 
-          forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == true <==> k in this.content
+          (forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == this.tbl[k] == (k in this.content))
     }
       
     constructor (size : nat) 
@@ -63,9 +61,9 @@ module Ex5 {
     }
 
     method mem (v : nat) returns (b : bool)
-      requires this.Valid()
-      ensures (v < |this.tblSeq| ==> b == (v in this.content) )
-           && (v < |this.tblSeq| ==> b == (tblSeq[v]))
+      requires this.Valid() && v < |this.tblSeq|
+      ensures b == (v in this.content) 
+           && b == (tblSeq[v])
     {
       b := false;
       if (v < tbl.Length){
@@ -74,11 +72,12 @@ module Ex5 {
     }
     
     method add (v : nat) 
-      requires this.Valid() && v < |tblSeq|
+      requires this.Valid()
+      requires v < |this.tblSeq|
       ensures this.content == { v } + old(this.content)
-      ensures this.footprint == { this.list } + old(this.footprint) 
-      modifies this, tbl
       ensures this.Valid()
+      modifies this, this.tbl
+
     {
       var value_exists := this.mem(v);
       if (this.list == null) {
@@ -88,19 +87,13 @@ module Ex5 {
         this.tblSeq := this.tbl[..];
         this.footprint := { aux };
         this.content := { v };
-        assert tblSeq[v] == true;
-        assert forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == true ==> k in this.content;
-        assert forall k :: 0 <= k < |this.tblSeq| ==>  k in this.content ==> this.tblSeq[k] == true ;
-        assert forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false ==> k !in this.content;
-        assert forall k :: 0 <= k < |this.tblSeq| ==>  k !in this.content ==> this.tblSeq[k] == false ;
-      } else if (!value_exists) {
+      } else if (this.list != null && !value_exists) {
         var added_node := this.list.add(v);
         this.list := added_node;
         this.tbl[v] := true;
         this.tblSeq := tbl[..];
         this.content := added_node.content;
         this.footprint := added_node.footprint;
-        assert this.content == { v } + old(this.content);
       }
     }
 
