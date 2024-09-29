@@ -85,6 +85,7 @@ module Ex3 {
       requires Valid()
       requires this.next != null ==> this.next.Valid()
       ensures fresh(n)
+      ensures fresh(n.footprint)
       ensures n.Valid()
       ensures n.content == this.content 
       ensures n.next != null ==> n.footprint - n.next.footprint == { n }
@@ -94,15 +95,11 @@ module Ex3 {
     {
       n := new Node(this.val);
       
-      if (this.next == null){
-        n.next := null;
-        n.content := { n.val };
-        n.footprint := { n };
-      }
-      else{
-        n.next := this.next.copy();
-        n.content := { n.val } + n.next.content;
-        n.footprint := { n } + n.next.footprint;
+      if (this.next != null) {
+        var aux := this.next.copy();
+        n.next := aux;
+        n.content := { n.val }  + aux.content;
+        n.footprint := { n }  + aux.footprint;
       }
     }
   }

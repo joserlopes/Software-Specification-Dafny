@@ -4,3 +4,7 @@ remember to implement the spec when asked!!
 
 Add specs for methods!
 Two way implication for 2.2
+
+
+comments for Zé:
+    Gostei da sua implementação até o add
