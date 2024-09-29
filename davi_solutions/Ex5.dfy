@@ -64,7 +64,7 @@ module Ex5 {
 
     method mem (v : nat) returns (b : bool)
       requires this.Valid()
-      ensures v < |this.tblSeq| ==> b == (v in this.content)
+      ensures v < |this.tblSeq| ==> b == (v in this.content) // What do you think abots
     {
       b := false;
       if (v < tbl.Length){
@@ -73,7 +73,30 @@ module Ex5 {
     }
     
     method add (v : nat) 
+      requires this.Valid() && v < tbl.Length
+      ensures this.content == { v } + old(this.content)
+      ensures this.footprint == { this.list } + old(this.footprint) 
+      modifies this, tbl
+      ensures this.Valid()
     {
+
+      var value_exists := tbl[v];
+      if (this.list == null) {
+        var aux := new Ex3.Node(v);
+        this.list := aux;
+        this.tbl[v] := true;
+        this.tblSeq := tbl[..];
+        this.footprint := { aux };
+        this.content := { v };
+      } else if (!value_exists) {
+        var added_node := this.list.add(v);
+        this.list := added_node;
+        this.content := added_node.content;
+        this.tbl[v] := true;
+        this.tblSeq := tbl[..];
+        this.footprint := added_node.footprint;
+        assert this.content == { v } + old(this.content);
+      }
     }
 
     method union(s : Set) returns (r : Set)
