@@ -37,6 +37,7 @@ module Ex4 {
     method mem (v : nat) returns (b : bool)
       requires this.Valid()
       ensures b == (v in this.content)
+      
       // ensures v in this.content <==> b == true 
     {
       b := false;
@@ -49,7 +50,7 @@ module Ex4 {
       requires this.Valid()
       ensures this.content == { v } + old(this.content)
       ensures this.footprint == { this.list } + old(this.footprint) 
-      modifies this, footprint
+      modifies this
       ensures this.Valid()
     {
       var value_exists := this.mem(v);
@@ -86,7 +87,7 @@ module Ex4 {
         r.list := this.list.copy();
         r.footprint := this.list.footprint;
         r.content := this.list.content;
-        return; // maybe some issue with copy
+        return;
       }
       else if(s.list != null){
         r.list := s.list.copy();
@@ -100,7 +101,8 @@ module Ex4 {
         r.content := this.content;
         var curr_s := s.list;
         while (curr_s != null)
-        invariant r.Valid()
+          decreases curr_s.footprint
+          invariant r.Valid()
         {
           r.add(curr_s.val);
           curr_s := curr_s.next;
@@ -112,10 +114,37 @@ module Ex4 {
 
 
   method inter(s : Set) returns (r : Set)
+      requires this.Valid() && s.Valid()
+      ensures r.content == s.content * this.content
+      ensures r.footprint == s.footprint * this.footprint
+      ensures fresh(r)
+      ensures r.Valid()
     {
-      
+      r := new Set();
 
+      if (this.list == null || s.list == null){
+        return;
+      }
+      else{
+        var curr := this.list;
+        var seen_elements := {};
+        while (curr != null)
+          invariant r.Valid()
+          invariant curr != null ==> curr.Valid() 
+          invariant r.content == seen_elements * s.content
+          decreases if curr != null then curr.footprint else {}
+        {
+          var val_in_s := s.mem(curr.val);
+          if (val_in_s == true) {
+            r.add(curr.val);
+          }
+          seen_elements := seen_elements + { curr.val };
+          curr := curr.next;
+        }
+        return;
+      }
     }
+
   }
 
 }
