@@ -32,11 +32,9 @@ module Ex5 {
           &&
           this.list.Valid()
           &&
-          (forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == (k in this.content))
-          &&
           // Just like in Ex2.2 this is a double way implication
           // Is this the same as this.tblSeq[k] <==> (k in this.content)
-          forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == (k in this.content)
+          forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == (k in this.content)
     }
       
     constructor(size : nat) 
