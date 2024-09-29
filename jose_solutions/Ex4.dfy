@@ -36,7 +36,6 @@ module Ex4 {
     // list.mem has linear complexity
     method mem(v : nat) returns (b : bool)
       requires this.Valid()
-      // ensures b == if this.list != null then (v in this.list.content) else false
       ensures b == (v in this.content)
     {
       b := false;
@@ -49,23 +48,21 @@ module Ex4 {
     // Since this method calls mem, it has linear complexity.
     method add(v : nat) 
       requires this.Valid()
+      ensures this.content == { v } + old(this.content)
       ensures this.Valid()
-      ensures old(this.content) == {} ==> this.content == { v } && this.footprint == { this.list }
-      // ensures old(this.content) != {} ==> this.content == { v } + old(this.content)
-      modifies this, this.footprint
+      modifies this // and this.footprint ??
     {
       var present := this.mem(v);
-      if (!present && this.list != null) {
-        var aux := this.list.add(v);
-        this.list := aux;
-        this.content := aux.content;
-        this.footprint :=  aux.footprint;
-      // If the list is empty then we can surely add the element
-      } else {
+      if (this.list == null) {
         var aux := new Ex3.Node(v);
         this.list := aux;
         this.footprint := { aux };
         this.content := { v };
+      } else if (!present) {
+        var aux := this.list.add(v);
+        this.list := aux;
+        this.content := aux.content;
+        this.footprint :=  aux.footprint;
       }
     }
 
