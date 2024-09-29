@@ -88,6 +88,7 @@ module Ex3 {
       ensures fresh(n.footprint)
       ensures n.Valid()
       ensures n.content == this.content 
+      ensures n.footprint == this.footprint // we need to prove this
       ensures n.next != null ==> n.footprint - n.next.footprint == { n }
       ensures n.next == null ==> n.footprint == { n }
       decreases this.footprint
@@ -98,8 +99,8 @@ module Ex3 {
       if (this.next != null) {
         var aux := this.next.copy();
         n.next := aux;
-        n.content := { n.val }  + aux.content;
-        n.footprint := { n }  + aux.footprint;
+        n.content := n.content + aux.content;
+        n.footprint := n.footprint  + aux.footprint;
       }
     }
   }
