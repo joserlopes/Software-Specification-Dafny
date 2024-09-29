@@ -39,7 +39,7 @@ module Ex5 {
       ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false
     {
       var aux := new bool[size + 1];
-      // Is there a better way to prove that all the elements of `presenceArr` are false at the beggining
+      // Is there a better way to prove that all the elements of `tblSeq` are false at the beggining
       var i := 0;
       while (i < aux.Length)
         invariant 0 <= i <= aux.Length
@@ -54,7 +54,6 @@ module Ex5 {
       this.footprint := {};
       this.content := {};
     }
-
 
     method mem (v : nat) returns (b : bool)
     {
@@ -71,7 +70,5 @@ module Ex5 {
     method inter(s : Set) returns (r : Set)
     {
     }
-
   }
-
 }
