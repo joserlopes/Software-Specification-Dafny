@@ -37,8 +37,6 @@ module Ex4 {
     method mem (v : nat) returns (b : bool)
       requires this.Valid()
       ensures b == (v in this.content)
-      
-      // ensures v in this.content <==> b == true 
     {
       b := false;
       if list != null{      
@@ -55,97 +53,99 @@ module Ex4 {
     {
       var value_exists := this.mem(v);
       if (this.list == null) {
-      var aux := new Ex3.Node(v);
-      this.list := aux;
-      this.footprint := { aux };
-      this.content := { v };
+        var aux := new Ex3.Node(v);
+        this.list := aux;
+        this.footprint := { aux };
+        this.content := { v };
       } else if (!value_exists) {
-      var added_node := this.list.add(v);
-      this.list := added_node;
-      this.content := added_node.content;
-      this.footprint := added_node.footprint;
+        var added_node := this.list.add(v);
+        this.list := added_node;
+        this.content := added_node.content;
+        this.footprint := added_node.footprint;
       }
     }
-
   
-    method union(s : Set) returns (r : Set)
-      requires this.Valid() && s.Valid()
-      ensures r.content == s.content + this.content
-      ensures r.footprint == s.footprint + this.footprint
-      ensures fresh(r)
-      ensures r.Valid()
+method union(s: Set) returns (r: Set)
+  requires this.Valid()
+  requires s.Valid()
+
+  ensures r.Valid()
+  ensures r.content == this.content + s.content
+  ensures fresh(r)
+{
+  r := new Set();
+
+  var curr := this.list;
+  ghost var seen_elements := {};
+
+  while (curr != null)
+    invariant r.Valid()
+    invariant curr != null ==> curr.Valid()
+    invariant curr != null && curr.next != null ==> curr.next.Valid()
+    invariant r.content == seen_elements
+    // I need an invariant for relating seen_elements and content
+    decreases if curr != null then curr.footprint else {}
+  {
+    r.add(curr.val);
+    seen_elements := seen_elements + {curr.val};
+    curr := curr.next;
+  } 
+  assert seen_elements == this.content;
+
+  var curr_s := s.list;
+
+  while (curr_s != null)
+      invariant r.Valid()
+      invariant curr_s != null ==> curr_s.Valid()
+      invariant curr_s != null && curr_s.next != null ==> curr_s.next.Valid()
+      invariant r.content == seen_elements
+      // I need an invariant for relating seen_elements and content
+      decreases if curr_s != null then curr_s.footprint else {}
     {
-      r := new Set();
-
-      if (this.list == null && s.list == null){
-        return;
-      }
-      else if(this.list != null){
-        assert s.list == null ==> s.content == {};
-        assert s.list == null ==> s.footprint == {};
-
-        r.list := this.list.copy();
-        r.footprint := this.list.footprint;
-        r.content := this.list.content;
-        return;
-      }
-      else if(s.list != null){
-        r.list := s.list.copy();
-        r.footprint := s.list.footprint;
-        r.content := s.list.content;
-        return;
-      }
-      else{
-        r.list := this.list.copy();
-        r.footprint := this.footprint;
-        r.content := this.content;
-        var curr_s := s.list;
-        while (curr_s != null)
-          decreases curr_s.footprint
-          invariant r.Valid()
-        {
-          r.add(curr_s.val);
-          curr_s := curr_s.next;
-        }
-        return;
-      }
-
+      r.add(curr_s.val);
+      seen_elements := seen_elements + {curr_s.val};
+      curr_s := curr_s.next;
     }
 
+  assert seen_elements == this.content + s.content;
+}
 
-  method inter(s : Set) returns (r : Set)
-      requires this.Valid() && s.Valid()
-      ensures r.content == s.content * this.content
-      ensures r.footprint == s.footprint * this.footprint
-      ensures fresh(r)
-      ensures r.Valid()
-    {
-      r := new Set();
+  // method inter(s : Set) returns (r : Set)
+  //     requires this.Valid() && s.Valid()
+  //     ensures forall x :: x in r.content ==> x in this.content && x in s.content
+  //     // ensures forall x :: x in r.footprint ==> x in this.footprint && x in s.footprint
+  //     ensures fresh(r)
+  //     ensures r.Valid()
+  //   {
+  //     r := new Set();
 
-      if (this.list == null || s.list == null){
-        return;
-      }
-      else{
-        var curr := this.list;
-        var seen_elements := {};
-        while (curr != null)
-          invariant r.Valid()
-          invariant curr != null ==> curr.Valid() 
-          invariant r.content == seen_elements * s.content
-          decreases if curr != null then curr.footprint else {}
-        {
-          var val_in_s := s.mem(curr.val);
-          if (val_in_s == true) {
-            r.add(curr.val);
-          }
-          seen_elements := seen_elements + { curr.val };
-          curr := curr.next;
-        }
-        return;
-      }
-    }
+  //     if (this.list == null || s.list == null){
+  //       return;
+  //     }
+  //     else{
+  //       var curr := this.list;
+  //       var seen_elements := {};
+  //       while (curr != null)
+  //         invariant r.Valid()
+  //         invariant curr != null ==> curr.Valid()
+  //         invariant curr != null ==> seen_elements == this.content - curr.content
+  //         invariant r.content == seen_elements * s.content
+  //         decreases if curr != null then curr.footprint else {}
+  //       {
+  //         var val_in_s := s.mem(curr.val);
+  //         if (val_in_s == true) {
+  //           r.add(curr.val);
+  //         }
+  //         seen_elements := seen_elements + { curr.val };
+  //         curr := curr.next;
+  //         assert curr != null && curr.next != null ==> curr !in curr.next.footprint;
+  //       }
+  //       assert r.content == seen_elements * s.content;
+  //       assert curr == null ==> seen_elements == this.list.content;
+  //       return;
+  //     }
+  //   }
 
   }
 
 }
-
