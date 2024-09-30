@@ -116,41 +116,46 @@ method union(s: Set) returns (r: Set)
   assert seen_elements + seen_elements_s == this.content + s.content;
 }
 
-  // method inter(s : Set) returns (r : Set)
-  //     requires this.Valid() && s.Valid()
-  //     ensures forall x :: x in r.content ==> x in this.content && x in s.content
-  //     // ensures forall x :: x in r.footprint ==> x in this.footprint && x in s.footprint
-  //     ensures fresh(r)
-  //     ensures r.Valid()
-  //   {
-  //     r := new Set();
+  method inter(s : Set) returns (r : Set)
+      requires this.Valid() 
+            && s.Valid()
+      ensures r.Valid()
+      ensures r.content == this.content * s.content
+      ensures fresh(r)
+    {
+      r := new Set();
 
-  //     if (this.list == null || s.list == null){
-  //       return;
-  //     }
-  //     else{
-  //       var curr := this.list;
-  //       var seen_elements := {};
-  //       while (curr != null)
-  //         invariant r.Valid()
-  //         invariant curr != null ==> curr.Valid()
-  //         invariant curr != null ==> seen_elements == this.content - curr.content
-  //         invariant r.content == seen_elements * s.content
-  //         decreases if curr != null then curr.footprint else {}
-  //       {
-  //         var val_in_s := s.mem(curr.val);
-  //         if (val_in_s == true) {
-  //           r.add(curr.val);
-  //         }
-  //         seen_elements := seen_elements + { curr.val };
-  //         curr := curr.next;
-  //         assert curr != null && curr.next != null ==> curr !in curr.next.footprint;
-  //       }
-  //       assert r.content == seen_elements * s.content;
-  //       assert curr == null ==> seen_elements == this.list.content;
-  //       return;
-  //     }
-  //   }
+      var curr := this.list;
+      ghost var added_elements := {};
+      ghost var seen_elements := {};
+
+      while (curr != null)
+        invariant r.Valid()
+        invariant curr != null ==> curr.Valid()
+        invariant curr != null && curr.next != null ==> curr.next.Valid()
+        invariant r.content == added_elements
+        invariant curr != null ==> this.content == curr.content + seen_elements
+        invariant curr == null ==> this.content == seen_elements
+
+        invariant seen_elements * s.content == added_elements
+        
+        invariant forall x :: x in added_elements ==> x in this.content
+        invariant forall x :: x in added_elements ==> x in s.content
+
+        
+        decreases if curr != null then curr.footprint else {}
+      {
+        var also_in_s := s.mem(curr.val);
+        if (also_in_s == true){
+          r.add(curr.val);
+          added_elements := added_elements + {curr.val};
+        }
+          seen_elements := seen_elements + {curr.val};
+          curr := curr.next;
+
+        
+      } 
+    }
 
   }
 
