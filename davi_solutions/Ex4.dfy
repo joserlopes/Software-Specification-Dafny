@@ -83,7 +83,9 @@ method union(s: Set) returns (r: Set)
     invariant curr != null ==> curr.Valid()
     invariant curr != null && curr.next != null ==> curr.next.Valid()
     invariant r.content == seen_elements
-    // I need an invariant for relating seen_elements and content
+    invariant curr != null ==> this.content == curr.content + seen_elements
+    invariant curr == null ==> this.content == seen_elements
+
     decreases if curr != null then curr.footprint else {}
   {
     r.add(curr.val);
@@ -94,20 +96,24 @@ method union(s: Set) returns (r: Set)
 
   var curr_s := s.list;
 
+  ghost var seen_elements_s := {};
+
   while (curr_s != null)
       invariant r.Valid()
       invariant curr_s != null ==> curr_s.Valid()
       invariant curr_s != null && curr_s.next != null ==> curr_s.next.Valid()
-      invariant r.content == seen_elements
-      // I need an invariant for relating seen_elements and content
+      invariant r.content == seen_elements_s + seen_elements
+      invariant curr_s != null ==> s.content == curr_s.content + seen_elements_s
+      invariant curr_s == null ==>  s.content == seen_elements_s 
+      
       decreases if curr_s != null then curr_s.footprint else {}
     {
       r.add(curr_s.val);
-      seen_elements := seen_elements + {curr_s.val};
+      seen_elements_s := seen_elements_s + {curr_s.val};
       curr_s := curr_s.next;
     }
 
-  assert seen_elements == this.content + s.content;
+  assert seen_elements + seen_elements_s == this.content + s.content;
 }
 
   // method inter(s : Set) returns (r : Set)
