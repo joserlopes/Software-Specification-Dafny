@@ -48,7 +48,9 @@ module Ex3 {
       ensures r.Valid()
         && r.content== { v } + this.content
         && r.footprint == { r } + this.footprint
+      ensures r.next == this
       ensures fresh(r)
+      ensures fresh(r.footprint - this.footprint)
     {
       r := new Node(v);
       r.next := this;
