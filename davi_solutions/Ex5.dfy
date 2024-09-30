@@ -4,6 +4,11 @@ module Ex5 {
   
   import Ex3=Ex3
 
+  function max(p1: nat, p2: nat): nat{
+      if p1>=p2 then p1
+      else p2
+  }
+
   class Set {
     var tbl : array<bool>  
     var list : Ex3.Node?
@@ -98,6 +103,23 @@ module Ex5 {
     }
 
     method union(s : Set) returns (r : Set)
+      requires this.Valid() && s.Valid()
+      ensures r.content == s.content + this.content
+      ensures r.footprint == s.footprint + this.footprint
+      ensures |r.tblSeq| == max(|this.tblSeq|, |s.tblSeq|)
+
+      ensures |this.tblSeq| >= |s.tblSeq| ==> 
+        (forall i :: 0 <= i < |s.tblSeq| ==> r.tblSeq[i] == this.tblSeq[i] || r.tblSeq[i])
+        &&
+        (forall i :: |s.tblSeq| <= i < |this.tblSeq| ==> r.tblSeq[i] == this.tblSeq[i])
+        
+      ensures |s.tblSeq| > |this.tblSeq| ==>
+        (forall i :: 0 <= i < |this.tblSeq| ==> r.tblSeq[i] == s.tblSeq[i] || r.tblSeq[i])
+        &&
+        (forall i :: |this.tblSeq| <= i < |s.tblSeq| ==> r.tblSeq[i] == s.tblSeq[i])
+
+      ensures fresh(r)
+      ensures r.Valid()
     {
     }
 
