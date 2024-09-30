@@ -7,7 +7,7 @@ module Ex3 {
     var next : Node?
 
     ghost var footprint : set<Node> 
-    ghost var content : set<nat> //set, not list. Which is weird.
+    ghost var content : set<nat>
 
     ghost function Valid() : bool 
       reads this, this.footprint 
@@ -84,24 +84,34 @@ module Ex3 {
     method copy() returns (n : Node) 
       requires Valid()
       requires this.next != null ==> this.next.Valid()
-      ensures fresh(n)
-      ensures fresh(n.footprint)
+
       ensures n.Valid()
-      ensures n.content == this.content 
-      ensures n.footprint == this.footprint // we need to prove this
+
+      ensures fresh(n)
+      ensures n.next != null ==> fresh(n.footprint)
+      
       ensures n.next != null ==> n.footprint - n.next.footprint == { n }
       ensures n.next == null ==> n.footprint == { n }
+      ensures n.content == this.content 
       decreases this.footprint
     
     {
       n := new Node(this.val);
       
-      if (this.next != null) {
+      if (this.next != null)
+       {
         var aux := this.next.copy();
         n.next := aux;
-        n.content := n.content + aux.content;
-        n.footprint := n.footprint  + aux.footprint;
+        n.content := { n.val } + aux.content;
+        n.footprint := { n }  + aux.footprint;
+        return;
+      } else {
+        n.next := null;
+        n.content := { n.val };
+        n.footprint := { n };
+        return;
       }
+      return;
     }
   }
 
