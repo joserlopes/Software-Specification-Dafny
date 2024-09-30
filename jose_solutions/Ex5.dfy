@@ -60,7 +60,7 @@ module Ex5 {
       this.content := {};
     }
 
-    method mem (v : nat) returns (b : bool)
+    method mem(v : nat) returns (b : bool)
       requires this.Valid()
       requires v < |this.tblSeq|
       ensures b == (v in this.content)
@@ -72,6 +72,7 @@ module Ex5 {
       requires this.Valid()
       requires v < |this.tblSeq|
       ensures this.content == { v } + old(this.content)
+      ensures this.footprint == { this.list } + old(this.footprint) 
       ensures this.Valid()
       modifies this, this.tbl
     {
@@ -83,7 +84,7 @@ module Ex5 {
         this.tblSeq := this.tbl[..];
         this.footprint := { aux };
         this.content := { v };
-      } else if (this.list != null && !present) {
+      } else if (!present) {
         var aux := this.list.add(v);
         this.list := aux;
         this.tbl[v] := true;
@@ -94,13 +95,79 @@ module Ex5 {
     }
 
     method union(s : Set) returns (r : Set)
+      requires this.Valid()
+      requires s.Valid()
+
+      ensures r.Valid()
+      ensures r.content == this.content + s.content
+      ensures fresh(r)
+      // TODO: Talk about tblSeq
+    {
+      var max_elem := maxM(this.tbl.Length, s.tbl.Length);
+      r := new Set(max_elem);
+
+      var curr := this.list;
+      ghost var seen_elements := {};
+
+      while (curr != null)
+        invariant r.Valid()
+        invariant curr != null ==> curr.Valid()
+        invariant curr != null && curr.next != null ==> curr.next.Valid()
+        invariant r.content == seen_elements
+        invariant curr != null ==> this.content == curr.content + seen_elements
+        invariant curr == null ==> this.content == seen_elements
+
+        decreases if curr != null then curr.footprint else {}
+      {
+        r.add(curr.val);
+        seen_elements := seen_elements + {curr.val};
+        curr := curr.next;
+      }
+
+      assert seen_elements == this.content;
+
+      var curr_s := s.list;
+
+      ghost var seen_elements_s := {};
+
+      while (curr_s != null)
+        invariant r.Valid()
+        invariant curr_s != null ==> curr_s.Valid()
+        invariant curr_s != null && curr_s.next != null ==> curr_s.next.Valid()
+        invariant r.content == seen_elements_s + seen_elements
+        invariant curr_s != null ==> s.content == curr_s.content + seen_elements_s
+        invariant curr_s == null ==>  s.content == seen_elements_s 
+        
+        decreases if curr_s != null then curr_s.footprint else {}
+      {
+        r.add(curr_s.val);
+        seen_elements_s := seen_elements_s + {curr_s.val};
+        curr_s := curr_s.next;
+      }
+
+    assert seen_elements + seen_elements_s == this.content + s.content;
+    }
+
+    method inter(s: Set) returns (r : Set)
     {
 
     }
+  }
 
-    method inter(s : Set) returns (r : Set)
-    {
+  function maxF(x: nat, y: nat) : nat
+  {
+    if x >= y
+      then x
+      else y
+  }
 
+  method maxM(x: nat, y: nat) returns (z: nat) 
+    ensures z == maxF(x, y)
+  {
+    if (x >= y) {
+      z := x;
+    } else {
+      z := y;
     }
   }
 }
