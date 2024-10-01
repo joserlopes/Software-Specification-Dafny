@@ -14,13 +14,13 @@ module Ex4 {
     {
       if (this.list == null)
         then 
-          footprint == {}
+          this.footprint == {}
           &&
-          content == {}
+          this.content == {}
         else 
-          footprint == list.footprint
+          this.footprint == list.footprint
           &&
-          content == list.content
+          this.content == list.content
           &&
           list.Valid()
     }
@@ -82,7 +82,6 @@ module Ex4 {
         decreases if curr != null then curr.footprint else {}
         invariant r.Valid()
         invariant curr != null ==> curr.Valid()
-        invariant curr != null && curr.next != null ==> curr.next.Valid()
         invariant r.content == seen_elements
         invariant curr != null ==> this.content == curr.content + seen_elements
         invariant curr == null ==> this.content == seen_elements
@@ -99,7 +98,6 @@ module Ex4 {
         decreases if curr_s != null then curr_s.footprint else {}
         invariant r.Valid()
         invariant curr_s != null ==> curr_s.Valid()
-        invariant curr_s != null && curr_s.next != null ==> curr_s.next.Valid()
         invariant r.content == seen_elements_s + seen_elements
         invariant curr_s != null ==> s.content == curr_s.content + seen_elements_s
         invariant curr_s == null ==> s.content == seen_elements_s
@@ -127,7 +125,6 @@ module Ex4 {
         decreases if curr != null then curr.footprint else {}
         invariant r.Valid()
         invariant curr != null ==> curr.Valid()
-        invariant curr != null && curr.next != null ==> curr.next.Valid()
         invariant r.content == added_elements
         invariant curr != null ==> this.content == curr.content + seen_elements
         invariant curr == null ==> this.content == seen_elements
