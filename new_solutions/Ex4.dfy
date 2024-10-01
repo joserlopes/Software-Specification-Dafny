@@ -26,7 +26,10 @@ module Ex4 {
     }
 
     constructor() 
-      ensures Valid() && this.content == {} && this.footprint == {} && this.list == null
+      ensures Valid() 
+        && this.content == {} 
+        && this.footprint == {} 
+        && this.list == null
     {
       list := null; 
       footprint := {}; 
@@ -39,7 +42,7 @@ module Ex4 {
     {
       b := false;
       if (list != null) {
-        b := this.list.mem(v); return;
+        b := this.list.mem(v);
       }
     }
 
@@ -71,6 +74,8 @@ module Ex4 {
 
       ensures r.Valid()
       ensures r.content == this.content + s.content
+      ensures |r.content| <= |this.content| + |s.content|
+      // ensures |r.footprint| >= |this.footprint| + |s.footprint| // to be proved
       ensures fresh(r)
     {
       r := new Set();

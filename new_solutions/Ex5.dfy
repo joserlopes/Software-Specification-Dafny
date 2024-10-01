@@ -32,26 +32,18 @@ module Ex5 {
           &&
           this.list.Valid()
           &&
+          (forall n :: n in this.content ==> n < |this.tblSeq|)
+          &&
           forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == (k in this.content)
     }
       
-    constructor(size : nat) 
-      ensures |this.tblSeq| > size
-      ensures this.tbl.Length > size
+    constructor(max_elem : nat) 
+      ensures |this.tblSeq| == max_elem + 1
       ensures this.tbl.Length == |this.tblSeq|
       ensures this.Valid() && this.content == {} && this.footprint == {}
-      ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == false
+      ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == this.tbl[k] == false
     {
-      var aux := new bool[size + 1];
-      // Is there a better way to prove that all the elements of `tblSeq` are false at the beggining
-      var i := 0;
-      while (i < aux.Length)
-        invariant 0 <= i <= aux.Length
-        invariant forall k :: 0 <= k < i ==> aux[k] == false
-      {
-        aux[i] := false;
-        i := i + 1;
-      }
+      var aux := new bool[max_elem + 1](_ => false); // last valid position must be aux[max_elem]. Lenght is max_elem + 1
 
       this.list := null;
       this.tbl := aux;
@@ -75,9 +67,9 @@ module Ex5 {
       ensures this.footprint == { this.list } + old(this.footprint)
       ensures this.Valid()
       ensures fresh(this.footprint - old(this.footprint))
-      modifies this
+      modifies this, this.tbl
     {
-      var present := this.mem(v);
+      var value_exists := this.mem(v);
       if (this.list == null) {
         var aux := new Ex3.Node(v);
         this.list := aux;
@@ -85,13 +77,19 @@ module Ex5 {
         this.tblSeq := this.tbl[..];
         this.footprint := { aux };
         this.content := { v };
-      } else if (!present) {
-        var aux := this.list.add(v);
-        this.list := aux;
-        this.tbl[v] := true;
-        this.tblSeq := this.tbl[..];
-        this.content := aux.content;
-        this.footprint :=  aux.footprint;
+      } 
+      else {
+        if (value_exists == false) {
+          var aux := this.list.add(v);
+          this.list := aux;
+          this.tbl[v] := true;
+          this.tblSeq := this.tbl[..];
+          this.content := aux.content;
+          this.footprint :=  aux.footprint;
+        }
+        else{
+          return;
+        }
       }
     }
 
@@ -101,18 +99,28 @@ module Ex5 {
 
       ensures r.Valid()
       ensures r.content == this.content + s.content
+      // ensures |r.footprint| >= |this.footprint| + |s.footprint| // to be proved
       ensures fresh(r)
-      ensures forall k :: k in this.content && k < |r.tblSeq| ==> r.tblSeq[k] == true
-      ensures forall k :: k in s.content && k < |r.tblSeq| ==> r.tblSeq[k] == true
-    {
-      var max_elem := maxM(this.tbl.Length, s.tbl.Length);
-      r := new Set(max_elem);
+      ensures forall k :: 0 <= k < |r.tblSeq| && k in this.content ==> r.tblSeq[k] == true
+      ensures forall k :: 0 <= k < |r.tblSeq| && k in s.content ==> r.tblSeq[k] == true
 
+      ensures forall k :: 0 <= k < |r.tblSeq| && r.tblSeq[k] == false ==> (k !in this.content) && (k !in s.content)
+    {
+      // get max_element size
+      var max_elem;
+      var max_lenght := maxM(this.tbl.Length, s.tbl.Length);
+      if (max_lenght != 0) {
+         max_elem := max_lenght -1; // e.g. length is 3: [0,1,2] Max element is 2.
+      }
+      else {
+        max_elem := max_lenght;
+      }
+      r := new Set(max_elem);
+      
+      // calculate union
       var curr := this.list;
       ghost var seen_elements := {};
 
-      // This assert should hold!!
-      assert forall k :: k in this.content ==> k < |r.tblSeq|;
       while (curr != null)
         decreases if curr != null then curr.footprint else {}
         invariant r.Valid()
@@ -121,6 +129,9 @@ module Ex5 {
         invariant curr != null ==> this.content == curr.content + seen_elements
         invariant curr == null ==> this.content == seen_elements
       {
+        
+        assert curr.val < this.tbl.Length;
+        assert curr.val < r.tbl.Length;
         r.add(curr.val);
         seen_elements := seen_elements + {curr.val};
         curr := curr.next;
