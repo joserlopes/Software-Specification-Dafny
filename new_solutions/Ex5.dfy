@@ -167,8 +167,62 @@ module Ex5 {
     }
 
     method inter(s: Set) returns (r : Set)
-    {
+      requires this.Valid()
+      requires s.Valid()
 
+      ensures r.Valid()
+      ensures r.content == this.content * s.content
+      ensures fresh(r)
+    {
+      var max_elem;
+      var max_length := maxM(this.tbl.Length, s.tbl.Length);
+      if (max_length != 0) {
+         max_elem := max_length -1; // e.g. length is 3: [0,1,2] Max element is 2.
+      }
+      else {
+        max_elem := max_length;
+      }
+      r := new Set(max_elem);
+
+      var curr := this.list;
+      ghost var added_elements := {};
+      ghost var seen_elements := {};
+
+      assert this.tbl.Length <= r.tbl.Length;
+      assert s.tbl.Length <= r.tbl.Length;
+      ghost var initialLength := r.tbl.Length;
+
+      while (curr != null) 
+        decreases if curr != null then curr.footprint else {}
+        invariant r.Valid()
+        invariant curr != null ==> curr.Valid()
+        invariant r.tbl.Length == initialLength
+        invariant this.Valid()
+        invariant fresh(r) && fresh(r.tbl)
+        invariant r.content == added_elements
+        invariant curr != null ==> this.content == curr.content + seen_elements
+        invariant curr == null ==> this.content == seen_elements
+
+        invariant seen_elements * s.content == added_elements
+
+        invariant forall x :: x in added_elements ==> x in this.content
+        invariant forall x :: x in added_elements ==> x in s.content
+      {
+        var also_in_s;
+
+        if (curr.val < s.tbl.Length){
+          also_in_s := s.mem(curr.val);
+        }
+        else{
+          also_in_s := false;
+        }
+        if (also_in_s) {
+          r.add(curr.val);
+          added_elements := added_elements + { curr.val };
+        }
+        seen_elements := seen_elements + { curr.val };
+        curr := curr.next;
+      }
     }
   }
 
@@ -183,6 +237,23 @@ module Ex5 {
     ensures z == maxF(x, y)
   {
     if (x >= y) {
+      z := x;
+    } else {
+      z := y;
+    }
+  }
+
+  function minF(x: nat, y: nat) : nat
+  {
+    if x <= y
+      then x
+      else y
+  }
+
+  method minM(x: nat, y: nat) returns (z: nat) 
+    ensures z == minF(x, y)
+  {
+    if (x <= y) {
       z := x;
     } else {
       z := y;
