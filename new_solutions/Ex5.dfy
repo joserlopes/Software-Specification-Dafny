@@ -42,6 +42,7 @@ module Ex5 {
       ensures this.tbl.Length == |this.tblSeq|
       ensures this.Valid() && this.content == {} && this.footprint == {}
       ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == this.tbl[k] == false
+      ensures fresh(this.tbl)
     {
       var aux := new bool[max_elem + 1](_ => false); // last valid position must be aux[max_elem]. Lenght is max_elem + 1
 
@@ -67,6 +68,7 @@ module Ex5 {
       ensures this.footprint == { this.list } + old(this.footprint)
       ensures this.Valid()
       ensures fresh(this.footprint - old(this.footprint))
+      ensures this.tbl == old(this.tbl)
       modifies this, this.tbl
     {
       var value_exists := this.mem(v);
@@ -99,11 +101,9 @@ module Ex5 {
 
       ensures r.Valid()
       ensures r.content == this.content + s.content
-      // ensures |r.footprint| >= |this.footprint| + |s.footprint| // to be proved
       ensures fresh(r)
       ensures forall k :: 0 <= k < |r.tblSeq| && k in this.content ==> r.tblSeq[k] == true
       ensures forall k :: 0 <= k < |r.tblSeq| && k in s.content ==> r.tblSeq[k] == true
-
       ensures forall k :: 0 <= k < |r.tblSeq| && r.tblSeq[k] == false ==> (k !in this.content) && (k !in s.content)
     {
       // get max_element size
@@ -120,11 +120,19 @@ module Ex5 {
       // calculate union
       var curr := this.list;
       ghost var seen_elements := {};
+      assert this.tbl.Length <= r.tbl.Length;
+      assert s.tbl.Length <= r.tbl.Length;
+      ghost var initialLength := r.tbl.Length;
 
       while (curr != null)
         decreases if curr != null then curr.footprint else {}
         invariant r.Valid()
+        invariant s.Valid()
+        invariant r.tbl.Length == initialLength
+        invariant this.Valid()
+        invariant fresh(r) && fresh(r.tbl)
         invariant curr != null ==> curr.Valid()
+        invariant this.tbl.Length <= r.tbl.Length
         invariant r.content == seen_elements
         invariant curr != null ==> this.content == curr.content + seen_elements
         invariant curr == null ==> this.content == seen_elements
@@ -132,6 +140,10 @@ module Ex5 {
         
         assert curr.val < this.tbl.Length;
         assert curr.val < r.tbl.Length;
+        assert r.tbl != s.tbl;
+        assert curr.val in this.content;
+        assert curr.val < this.tbl.Length;
+        
         r.add(curr.val);
         seen_elements := seen_elements + {curr.val};
         curr := curr.next;
@@ -140,11 +152,18 @@ module Ex5 {
       var curr_s := s.list;
       ghost var seen_elements_s := {};
 
+      assert s.tbl.Length <= r.tbl.Length;
+
       while (curr_s != null)
         decreases if curr_s != null then curr_s.footprint else {}
         invariant r.Valid()
+        invariant r.Valid()
+        invariant s.Valid()
+        invariant this.Valid()
+        invariant fresh(r) && fresh(r.tbl)
         invariant curr_s != null ==> curr_s.Valid()
         invariant r.content == seen_elements_s + seen_elements
+        invariant s.tbl.Length <= r.tbl.Length
         invariant curr_s != null ==> s.content == curr_s.content + seen_elements_s
         invariant curr_s == null ==> s.content == seen_elements_s
       {
