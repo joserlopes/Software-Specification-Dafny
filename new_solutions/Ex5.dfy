@@ -89,7 +89,7 @@ module Ex5 {
           this.content := aux.content;
           this.footprint :=  aux.footprint;
         }
-        else{
+        else {
           return;
         }
       }
@@ -110,9 +110,8 @@ module Ex5 {
       var max_elem;
       var max_lenght := maxM(this.tbl.Length, s.tbl.Length);
       if (max_lenght != 0) {
-         max_elem := max_lenght -1; // e.g. length is 3: [0,1,2] Max element is 2.
-      }
-      else {
+         max_elem := max_lenght - 1; // e.g. length is 3: [0,1,2] Max element is 2.
+      } else {
         max_elem := max_lenght;
       }
       r := new Set(max_elem);
@@ -127,6 +126,7 @@ module Ex5 {
 
       while (curr != null)
         decreases if curr != null then curr.footprint else {}
+
         invariant r.Valid()
         invariant s.Valid()
         invariant r.tbl.Length == initialLength
@@ -148,15 +148,15 @@ module Ex5 {
 
       while (curr_s != null)
         decreases if curr_s != null then curr_s.footprint else {}
-        invariant r.Valid()
+
         invariant r.Valid()
         invariant s.Valid()
         invariant r.tbl.Length == initialLength
         invariant this.Valid()
         invariant fresh(r) && fresh(r.tbl)
         invariant curr_s != null ==> curr_s.Valid()
-        invariant r.content == seen_elements_s + seen_elements
         invariant s.tbl.Length <= r.tbl.Length
+        invariant r.content == seen_elements_s + seen_elements
         invariant curr_s != null ==> s.content == curr_s.content + seen_elements_s
         invariant curr_s == null ==> s.content == seen_elements_s
       {
@@ -177,7 +177,7 @@ module Ex5 {
       var max_elem;
       var max_length := maxM(this.tbl.Length, s.tbl.Length);
       if (max_length != 0) {
-         max_elem := max_length -1; // e.g. length is 3: [0,1,2] Max element is 2.
+         max_elem := max_length - 1; // e.g. length is 3: [0,1,2] Max element is 2.
       }
       else {
         max_elem := max_length;
@@ -194,6 +194,7 @@ module Ex5 {
 
       while (curr != null) 
         decreases if curr != null then curr.footprint else {}
+
         invariant r.Valid()
         invariant curr != null ==> curr.Valid()
         invariant r.tbl.Length == initialLength
@@ -205,21 +206,19 @@ module Ex5 {
 
         invariant seen_elements * s.content == added_elements
 
-        invariant forall x :: x in added_elements ==> x in this.content
-        invariant forall x :: x in added_elements ==> x in s.content
+        invariant forall x :: x in added_elements ==> x in this.content && x in s.content
       {
-        var also_in_s;
+        var also_in_s := false;
 
-        if (curr.val < s.tbl.Length){
+        if (curr.val < s.tbl.Length) {
           also_in_s := s.mem(curr.val);
         }
-        else{
-          also_in_s := false;
-        }
+
         if (also_in_s) {
           r.add(curr.val);
           added_elements := added_elements + { curr.val };
         }
+
         seen_elements := seen_elements + { curr.val };
         curr := curr.next;
       }
@@ -237,23 +236,6 @@ module Ex5 {
     ensures z == maxF(x, y)
   {
     if (x >= y) {
-      z := x;
-    } else {
-      z := y;
-    }
-  }
-
-  function minF(x: nat, y: nat) : nat
-  {
-    if x <= y
-      then x
-      else y
-  }
-
-  method minM(x: nat, y: nat) returns (z: nat) 
-    ensures z == minF(x, y)
-  {
-    if (x <= y) {
       z := x;
     } else {
       z := y;

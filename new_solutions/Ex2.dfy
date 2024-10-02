@@ -45,17 +45,7 @@ method noRepetitionsLinear(arr : array<nat>) returns (b: bool)
 {
   var maxElement := maxArrVal(arr);
 
-  var presenceArr := new bool[maxElement + 1];
-
-  // Is there a better way to prove that all the elements of `presenceArr` are false at the beggining
-  var j := 0;
-  while (j < presenceArr.Length)
-    invariant 0 <= j <= presenceArr.Length
-    invariant forall k :: 0 <= k < j ==> presenceArr[k] == false
-  {
-    presenceArr[j] := false;
-    j := j + 1;
-  }
+  var presenceArr := new bool[maxElement + 1](_ => false);
 
   var i := 0;
   b := true;
