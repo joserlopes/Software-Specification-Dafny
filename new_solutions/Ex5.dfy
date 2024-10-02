@@ -120,6 +120,7 @@ module Ex5 {
       // calculate union
       var curr := this.list;
       ghost var seen_elements := {};
+
       assert this.tbl.Length <= r.tbl.Length;
       assert s.tbl.Length <= r.tbl.Length;
       ghost var initialLength := r.tbl.Length;
@@ -137,13 +138,6 @@ module Ex5 {
         invariant curr != null ==> this.content == curr.content + seen_elements
         invariant curr == null ==> this.content == seen_elements
       {
-        
-        assert curr.val < this.tbl.Length;
-        assert curr.val < r.tbl.Length;
-        assert r.tbl != s.tbl;
-        assert curr.val in this.content;
-        assert curr.val < this.tbl.Length;
-        
         r.add(curr.val);
         seen_elements := seen_elements + {curr.val};
         curr := curr.next;
@@ -152,13 +146,12 @@ module Ex5 {
       var curr_s := s.list;
       ghost var seen_elements_s := {};
 
-      assert s.tbl.Length <= r.tbl.Length;
-
       while (curr_s != null)
         decreases if curr_s != null then curr_s.footprint else {}
         invariant r.Valid()
         invariant r.Valid()
         invariant s.Valid()
+        invariant r.tbl.Length == initialLength
         invariant this.Valid()
         invariant fresh(r) && fresh(r.tbl)
         invariant curr_s != null ==> curr_s.Valid()
