@@ -122,8 +122,8 @@ module Ex1 {
 
         }
       case BinOp(op, a1, a2) =>
-        assert Serialize(a2) + Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a2) + (Serialize(a1) + [BinOpCode(op)] + cs); //why this might not hold?
-        assert Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a1) + ([BinOpCode(op)] + cs); //why this might not hold?
+        assert Serialize(a2) + Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a2) + (Serialize(a1) + [BinOpCode(op)] + cs);
+        assert Serialize(a1) + [ BinOpCode(op) ] + cs == Serialize(a1) + ([BinOpCode(op)] + cs);
         assert [a1] + ([a2] + es) == [a1, a2] + es;
         calc{
           DeserializeAux(Serialize(e) + cs, es);
@@ -138,7 +138,7 @@ module Ex1 {
           ==
           DeserializeAux(Serialize(a1) + ([ BinOpCode(op) ] + cs), [a2] + es); // Seq props
           == {DeserializeAuxProperty(a2, [ BinOpCode(op) ] + cs, es);}
-          DeserializeAux([ BinOpCode(op) ] + cs, [a1] + ([a2] + es)); // lemma. Why cant be proved?
+          DeserializeAux([ BinOpCode(op) ] + cs, [a1] + ([a2] + es)); // lemma.
           ==
           DeserializeAux([ BinOpCode(op) ] + cs, [a1, a2] + es); // Seq props
           ==
@@ -173,7 +173,7 @@ module Ex1 {
         case 0 => if |ints| == 1 then [] else [ ValCode(ints[1]) ] + DeserializeCodes(ints[2..])
         case 1 => if |ints| == 1 || |ints| < ints[1] + 2 then [] else [ VarCode(ints[2..ints[1]+2]) ] + DeserializeCodes(ints[ints[1]+2..]) // E.g. 13ABCX
         case 2 => [ UnOpCode(Neg) ] + DeserializeCodes(ints[1..])
-        case 3 => [ BinOpCode(Plus) ] + DeserializeCodes(ints[1..]) //add the ugly condition here?
+        case 3 => [ BinOpCode(Plus) ] + DeserializeCodes(ints[1..])
         case 4 => [ BinOpCode(Minus) ] + DeserializeCodes(ints[1..])
         case _ => []
       }
