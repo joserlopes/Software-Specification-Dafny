@@ -53,6 +53,8 @@ module Ex2 {
 
     while (i < arr.Length)
       invariant 0 <= i <= arr.Length
+      invariant forall k :: 0 <= k < i ==> presenceArr[arr[k]]
+      invariant forall k1 :: 0 <= k1 < presenceArr.Length && !presenceArr[k1] ==> forall k2 :: 0 <= k2 < i ==> arr[k2] != k1
       invariant forall k1, k2 :: 0 <= k1 < i && 0 <= k2 < i && k1 != k2 ==> arr[k1] != arr[k2]
       invariant forall k1 :: 0 <= k1 < presenceArr.Length && presenceArr[k1] <==> exists k2 :: 0 <= k2 < i && arr[k2] == k1
     {
