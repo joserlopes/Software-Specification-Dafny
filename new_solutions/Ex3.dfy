@@ -29,6 +29,9 @@ module Ex3 {
         this.next.Valid()
     }
 
+    /*
+      Ex3.1
+    */
     constructor (v : nat)
       ensures this.Valid()
         && this.next == null && this.content == { v }
@@ -40,6 +43,9 @@ module Ex3 {
       this.content := { v };
     }
 
+    /*
+      Ex3.2
+    */
     method add(v : nat) returns (r : Node)
       requires this.Valid()
       ensures r.Valid()
@@ -48,7 +54,7 @@ module Ex3 {
       ensures r.next == this
       ensures r.footprint - this.footprint == { r }
       ensures fresh(r)
-      // ensures fresh(r.footprint - this.footprint)
+      ensures fresh(r.footprint - this.footprint)
     {
       r := new Node(v);
       r.next := this;
@@ -56,6 +62,9 @@ module Ex3 {
       r.content := { v } + this.content;
     }
 
+    /*
+      Ex3.3
+    */
     method mem(v : nat) returns (b : bool)
       requires this.Valid()
       ensures b == (v in this.content)
@@ -69,6 +78,9 @@ module Ex3 {
       }
     }
 
+    /*
+      Ex3.4
+    */
     method copy() returns (n : Node)
       requires this.Valid()
       ensures n.Valid()

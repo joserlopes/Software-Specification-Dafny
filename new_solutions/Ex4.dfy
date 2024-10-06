@@ -36,6 +36,9 @@ module Ex4 {
       content := {};      
     }
 
+    /*
+      Ex4.1
+    */
     method mem(v : nat) returns (b : bool)
       requires this.Valid()
       ensures b == (v in this.content)
@@ -46,12 +49,15 @@ module Ex4 {
       }
     }
 
+    /*
+      Ex4.2
+    */
     method add(v : nat) 
       requires this.Valid()
-      ensures this.Valid()
       ensures this.content == { v } + old(this.content)
       ensures this.footprint == { this.list } + old(this.footprint)
       ensures fresh(this.footprint - old(this.footprint))
+      ensures this.Valid()
       modifies this
     {
       var value_exists := this.mem(v);
@@ -68,6 +74,9 @@ module Ex4 {
       }
     }
 
+    /*
+      Ex4.3
+    */
     method union(s : Set) returns (r : Set)
       requires this.Valid()
       requires s.Valid()
@@ -75,7 +84,6 @@ module Ex4 {
       ensures r.Valid()
       ensures r.content == this.content + s.content
       ensures |r.content| <= |this.content| + |s.content|
-      // ensures |r.footprint| >= |this.footprint| + |s.footprint| // to be proved
       ensures fresh(r)
     {
       r := new Set();
@@ -113,6 +121,9 @@ module Ex4 {
       }
     }
 
+    /*
+      Ex4.4
+    */
     method inter(s : Set) returns (r : Set)
       requires this.Valid()
       requires s.Valid()

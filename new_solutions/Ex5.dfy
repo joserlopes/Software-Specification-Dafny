@@ -8,6 +8,9 @@ module Ex5 {
     var tbl : array<bool>  
     var list : Ex3.Node?
 
+    /*
+      Ex5.1
+    */
     ghost var footprint: set<Ex3.Node>
     ghost var content: set<nat>
     ghost var tblSeq: seq<bool>
@@ -37,14 +40,17 @@ module Ex5 {
           forall k :: 0 <= k < |this.tblSeq| == this.tbl.Length ==> this.tblSeq[k] == this.tbl[k] == (k in this.content)
     }
       
-    constructor(max_elem : nat) 
-      ensures |this.tblSeq| == max_elem + 1
+    /*
+      Ex5.2
+    */
+    constructor(maxElement : nat) 
+      ensures |this.tblSeq| == maxElement + 1
       ensures this.tbl.Length == |this.tblSeq|
       ensures this.Valid() && this.content == {} && this.footprint == {}
       ensures forall k :: 0 <= k < |this.tblSeq| ==> this.tblSeq[k] == this.tbl[k] == false
       ensures fresh(this.tbl)
     {
-      var aux := new bool[max_elem + 1](_ => false); // last valid position must be aux[max_elem]. Lenght is max_elem + 1
+      var aux := new bool[maxElement + 1](_ => false); // last valid position must be aux[max_elem]. Lenght is max_elem + 1
 
       this.list := null;
       this.tbl := aux;
@@ -53,6 +59,9 @@ module Ex5 {
       this.content := {};
     }
 
+    /*
+      Ex5.3
+    */
     method mem(v : nat) returns (b : bool)
       requires this.Valid()
       requires v < |this.tblSeq|
@@ -66,8 +75,8 @@ module Ex5 {
       requires v < |this.tblSeq|
       ensures this.content == { v } + old(this.content)
       ensures this.footprint == { this.list } + old(this.footprint)
-      ensures this.Valid()
       ensures fresh(this.footprint - old(this.footprint))
+      ensures this.Valid()
       ensures this.tbl == old(this.tbl)
       modifies this, this.tbl
     {
@@ -101,6 +110,7 @@ module Ex5 {
 
       ensures r.Valid()
       ensures r.content == this.content + s.content
+      ensures |r.content| <= |this.content| + |s.content|
       ensures fresh(r)
       ensures forall k :: 0 <= k < |r.tblSeq| && k in this.content ==> r.tblSeq[k] == true
       ensures forall k :: 0 <= k < |r.tblSeq| && k in s.content ==> r.tblSeq[k] == true
